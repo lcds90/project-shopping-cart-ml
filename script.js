@@ -1,5 +1,4 @@
 const cart = document.querySelector('.cart__items');
-
 function createProductImageElement(imageSource) {
   const img = document.createElement('img');
   img.className = 'item__image';
@@ -34,8 +33,8 @@ function getSkuFromProductItem(item) {
 async function changePrice(price, operation) {
   const div = document.querySelector('.total-price');
   let value = Number(div.innerHTML);
-  if( operation === 'plus') value += price;
-  if( operation === 'minus') value -= price;
+  if (operation === 'plus') value += price;
+  if (operation === 'minus') value -= price;
   console.log(value);
   div.innerHTML = value;
 }
@@ -43,7 +42,7 @@ async function changePrice(price, operation) {
 function cartItemClickListener(event, price) {
   event.preventDefault();
   event.target.remove();
-  changePrice(price, 'minus')
+  changePrice(price, 'minus');
   localStorage.setItem('items', cart.innerHTML);
 }
 
@@ -57,17 +56,27 @@ function createCartItemElement({ sku, name, salePrice }) {
 }
 
 const makeRequestAllProducts = async () => {
+  const loading = document.createElement('section');
+  const div = document.querySelector('.container');
+  loading.className = 'loading';
+  div.appendChild(loading);
   return fetch('https://api.mercadolibre.com/sites/MLB/search?q=computador')
     .then((response) => response.json())
     .then((json) => {
+      loading.remove();
       return json.results;
     });
 };
 
 const makeRequestProductById = async (id) => {
+  const loading = document.createElement('section');
+  const div = document.querySelector('.container');
+  loading.className = 'loading';
+  div.appendChild(loading);
   await fetch(`https://api.mercadolibre.com/items/${id}`)
     .then((response) => response.json())
     .then(async (product) => {
+      loading.remove();
       const productObject = {
         sku: product.id,
         name: product.title,
@@ -121,8 +130,8 @@ const eraseCart = async () => {
   btn.addEventListener('click', () => {
     cart.innerHTML = '';
     localStorage.removeItem('items');
-  })
-}
+  });
+};
 
 window.onload = async () => {
   await getItemsList();
