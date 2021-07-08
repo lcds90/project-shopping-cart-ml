@@ -20,14 +20,8 @@ async function createProductItemElement({ sku, name, image }) {
   section.appendChild(createCustomElement('span', 'item__sku', sku));
   section.appendChild(createCustomElement('span', 'item__title', name));
   section.appendChild(createProductImageElement(image));
-  section.appendChild(
-    createCustomElement('button', 'item__add', 'Adicionar ao carrinho!')
-  );
+  section.appendChild(createCustomElement('button', 'item__add', 'Adicionar ao carrinho!'));
   return section;
-}
-
-function getSkuFromProductItem(item) {
-  return item.querySelector('span.item__sku').innerText;
 }
 
 async function changePrice(price, operation) {
@@ -101,7 +95,7 @@ const makeRequestAndGetProducts = async () => {
   const div = document.querySelector('.items');
   const result = await makeRequestAllProducts();
 
-  for (const product of result) {
+  result.forEach(async (product) => {
     const productObject = {
       sku: product.id,
       name: product.title,
@@ -111,7 +105,7 @@ const makeRequestAndGetProducts = async () => {
     const section = await createProductItemElement(productObject);
     section.setAttribute('data-id', productObject.sku);
     await div.appendChild(section);
-  }
+  });
 };
 
 const getItemsList = async () => {
@@ -120,8 +114,7 @@ const getItemsList = async () => {
     cart.innerHTML = products;
     const divs = await cart.children;
     Object.values(divs).forEach((div) =>
-      div.addEventListener('click', cartItemClickListener)
-    );
+      div.addEventListener('click', cartItemClickListener));
   }
 };
 
