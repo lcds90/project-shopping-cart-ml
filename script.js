@@ -31,9 +31,19 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
-function cartItemClickListener(event) {
+async function changePrice(price, operation) {
+  const div = document.querySelector('.total-price');
+  let value = Number(div.innerHTML);
+  if( operation === 'plus') value += price;
+  if( operation === 'minus') value -= price;
+  console.log(value);
+  div.innerHTML = value;
+}
+
+function cartItemClickListener(event, price) {
   event.preventDefault();
   event.target.remove();
+  changePrice(price, 'minus')
   localStorage.setItem('items', cart.innerHTML);
 }
 
@@ -41,7 +51,8 @@ function createCartItemElement({ sku, name, salePrice }) {
   const li = document.createElement('li');
   li.className = 'cart__item';
   li.innerText = `SKU: ${sku} | NAME: ${name} | PRICE: $${salePrice}`;
-  li.addEventListener('click', cartItemClickListener);
+  li.addEventListener('click', (e) => cartItemClickListener(e, salePrice));
+  changePrice(salePrice, 'plus');
   return li;
 }
 
@@ -56,13 +67,14 @@ const makeRequestAllProducts = async () => {
 const makeRequestProductById = async (id) => {
   await fetch(`https://api.mercadolibre.com/items/${id}`)
     .then((response) => response.json())
-    .then((product) => {
+    .then(async (product) => {
       const productObject = {
         sku: product.id,
         name: product.title,
         salePrice: product.price,
       };
-      const productItem = createCartItemElement(productObject);
+      const productItem = await createCartItemElement(productObject);
+      await changePrice(productObject.salePrice);
       cart.appendChild(productItem);
       localStorage.setItem('items', cart.innerHTML);
     });
@@ -95,16 +107,26 @@ const makeRequestAndGetProducts = async () => {
 
 const getItemsList = async () => {
   const products = await localStorage.getItem('items');
-  if(products){
+  if (products) {
     cart.innerHTML = products;
-    const divs = await cart.children
-    Object.values(divs).forEach((div) => div.addEventListener('click', cartItemClickListener))
-    // divs.forEach((div) => console.log(div))
-  }  
+    const divs = await cart.children;
+    Object.values(divs).forEach((div) =>
+      div.addEventListener('click', cartItemClickListener)
+    );
+  }
+};
+
+const eraseCart = async () => {
+  const btn = document.querySelector('.empty-cart');
+  btn.addEventListener('click', () => {
+    cart.innerHTML = '';
+    localStorage.removeItem('items');
+  })
 }
 
 window.onload = async () => {
   await getItemsList();
+  await eraseCart();
   await makeRequestAndGetProducts();
   await activeGetProductsToCart();
 };
