@@ -13,48 +13,70 @@ function createCustomElement(element, className, innerText) {
   return e;
 }
 
-async function createProductItemElement({ sku, name, image }) {
+async function createProductItemElement({
+  id: sku,
+  title: name,
+  thumbnail: image,
+  price: salePrice,
+}) {
   const section = document.createElement('section');
   section.className = 'item';
 
   section.appendChild(createCustomElement('span', 'item__sku', sku));
   section.appendChild(createCustomElement('span', 'item__title', name));
   section.appendChild(createProductImageElement(image));
-  section.appendChild(createCustomElement('button', 'item__add', 'Adicionar ao carrinho!'));
+  section.appendChild(createCustomElement('span', 'item__price', `$ ${salePrice}`));
+  section.appendChild(
+    createCustomElement('button', 'item__add', 'Adicionar ao carrinho'),
+  );
   return section;
 }
 
-async function changePrice(price, operation) {
-  const div = document.querySelector('.total-price');
-  let value = Number(div.innerHTML);
-  if (operation === 'plus') value += price;
-  if (operation === 'minus') value -= price;
-  console.log(value);
-  div.innerHTML = value;
+function changePrice(price, operation) {
+  const getValuesLine = localStorage.getItem('items') ? localStorage.getItem('items').split(',') : '';
+  
+  if (getValuesLine) {
+    let values = getValuesLine.map((value) => value.split('|')[1]);
+    values = values.filter((value) => value !== undefined);
+    let total = values.reduce((acc, curr) => {
+      acc += curr; 
+      return acc;
+    });
+
+    if (operation === 'plus') total += price;
+    if (operation === 'minus') total -= price;
+    localStorage.setItem('value', total);
+    document.querySelector('.total-price').innerHTML = total;
+  }
 }
 
-function cartItemClickListener(event, price) {
+async function cartItemClickListener(event, price) {
   event.preventDefault();
-  event.target.remove();
+  event.currentTarget.remove();
   changePrice(price, 'minus');
-  localStorage.setItem('items', cart.innerHTML);
+
+  localStorage.setItem('itemsHTML', cart.innerHTML);
 }
 
-function createCartItemElement({ sku, name, salePrice }) {
+async function createCartItemElement({
+  id: sku,
+  title: name,
+  price: salePrice,
+}) {
   const li = document.createElement('li');
   li.className = 'cart__item';
-  li.innerText = `SKU: ${sku} | NAME: ${name} | PRICE: $${salePrice}`;
+  li.innerHTML = `<span class="cart__id">SKU: ${sku}</span><span class="cart__name"> | NAME: ${name}</span><span class="cart__price"> | PRICE: $${salePrice}</span>`;
   li.addEventListener('click', (e) => cartItemClickListener(e, salePrice));
   changePrice(salePrice, 'plus');
   return li;
 }
 
-const makeRequestAllProducts = async () => {
+const makeRequestAllProducts = async (query = 'computador') => {
   const loading = document.createElement('section');
   const div = document.querySelector('.container');
   loading.className = 'loading';
   div.appendChild(loading);
-  return fetch('https://api.mercadolibre.com/sites/MLB/search?q=computador')
+  return fetch(`https://api.mercadolibre.com/sites/MLB/search?q=${query}`)
     .then((response) => response.json())
     .then((json) => {
       loading.remove();
@@ -71,15 +93,13 @@ const makeRequestProductById = async (id) => {
     .then((response) => response.json())
     .then(async (product) => {
       loading.remove();
-      const productObject = {
-        sku: product.id,
-        name: product.title,
-        salePrice: product.price,
-      };
-      const productItem = await createCartItemElement(productObject);
-      await changePrice(productObject.salePrice);
+      const productItem = await createCartItemElement(product);
+      await changePrice(product.price, 'plus');
       cart.appendChild(productItem);
-      localStorage.setItem('items', cart.innerHTML);
+      let itens = localStorage.getItem('items') ? localStorage.getItem('items') : '';
+      itens += `${product.id}|${product.price},`;
+      localStorage.setItem('items', itens);
+      localStorage.setItem('itemsHTML', cart.innerHTML);
     });
 };
 
@@ -96,25 +116,31 @@ const makeRequestAndGetProducts = async () => {
   const result = await makeRequestAllProducts();
 
   result.forEach(async (product) => {
-    const productObject = {
-      sku: product.id,
-      name: product.title,
-      image: product.thumbnail,
-    };
-
-    const section = await createProductItemElement(productObject);
-    section.setAttribute('data-id', productObject.sku);
+    const section = await createProductItemElement(product);
+    section.setAttribute('data-id', product.id);
+    section.setAttribute('data-price', product.price);
     await div.appendChild(section);
   });
 };
 
+const getValueAndGoToTotal = async (div) => {
+  const getValuesLine = localStorage.getItem('items').split(',');
+  let values = getValuesLine.map((value) => value.split('|')[1]);
+  values = values.filter((value) => value !== undefined);
+  if (getValuesLine) {
+    await values.map((value) => changePrice(value, 'plus'));
+  }
+};
+
 const getItemsList = async () => {
-  const products = await localStorage.getItem('items');
+  const products = await localStorage.getItem('itemsHTML');
   if (products) {
     cart.innerHTML = products;
     const divs = await cart.children;
-    Object.values(divs).forEach((div) =>
-      div.addEventListener('click', cartItemClickListener));
+    Object.values(divs).forEach(async (div) => {
+      await getValueAndGoToTotal();
+      div.addEventListener('click', cartItemClickListener);
+    });
   }
 };
 
@@ -123,6 +149,8 @@ const eraseCart = async () => {
   btn.addEventListener('click', () => {
     cart.innerHTML = '';
     localStorage.removeItem('items');
+    localStorage.removeItem('itemsHTML');
+    localStorage.removeItem('value');
   });
 };
 
