@@ -41,6 +41,7 @@ body {
   place-items: center;
   align-items: center;
   width: 100%;
+  padding: 10px;
 }
 
 .item {
@@ -57,6 +58,12 @@ body {
   z-index: 25;
   position: relative;
   border-inline: 2px solid var(--grey-color);
+  padding: 5px;
+
+}
+
+.item > * {
+  padding: 5px;
 }
 
 .item .item__sku {
@@ -106,6 +113,7 @@ body {
   border-bottom-right-radius: 5px;
   font-family: 'Crimson Text', serif;
   transition: 1s ease all;
+  line-height: 10px;
 }
 
 .item .item__add:hover {
@@ -363,7 +371,7 @@ ul {
   .cart button,
   .cart__item,
   .item {
-    transition: box-shadow 1s ease, transform 0.5s ease-in-out;
+    transition: box-shadow 1s ease, transform 0.5s ease-in-out, filter 0.5s ease;
   }
   .cart__title:hover,
   .price:hover,
@@ -371,6 +379,7 @@ ul {
   .cart__item:hover,
   .item:hover {
     box-shadow: 0 10px 5px rgba(0, 0, 0, 0.5);
-    transform: scale(1.05);
+    transform: scale(1.015);
+    filter: brightness(1.15);
   }
 }
