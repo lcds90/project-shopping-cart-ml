@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Carrinho de compras</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <link rel="stylesheet" href="animations.css">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="shortcut icon" href="./ico.png" type="image/x-icon">
+</head>
+
+<body>
+  <main class="container">
+
+    <section class="cart">
+      <article>
+        <span class="cart__title">
+          <i>Carrinho de compras</i>
+          <div></div>
+        </span>
+        <input type="text" id="search" placeholder="Digite sua pesquisa e pressione enter">
+        <button class="empty-cart">Esvaziar carrinho</button>
+        <div class="price">
+          <div class="price-article">Itens</div>
+          <span class="total-qtd"></span>
+          <div class="price-article">Total $</div>
+          <span class="total-price"></span>
+        </div>
+      </article>
+      <article>
+        <ol class="cart__items"></ol>
+      </article>
+    </section>
+    <section class="items"></section>
+  </main>
+  <script src="script.js"></script>
+</body>
+
+</html>
