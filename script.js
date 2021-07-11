@@ -1,4 +1,50 @@
 const cart = document.querySelector('.cart__items');
+const priceCard = document.querySelector('.total-price');
+
+// SECTION Requisito 1
+async function makeRequestAllProducts(query = 'computador') {
+  const loading = document.createElement('section');
+  const div = document.querySelector('.container');
+  // NOTE Requisito 7
+  loading.className = 'loading';
+  loading.innerText = 'Carregando...';
+  div.appendChild(loading);
+  const response = await fetch(
+    `https://api.mercadolibre.com/sites/MLB/search?q=${query}`,
+  );
+  const products = await response.json();
+  loading.remove();
+  return products.results;
+}
+// !SECTION
+
+async function makeRequestProductById(id) {
+  const loading = document.createElement('section');
+  const div = document.querySelector('.container');
+  loading.className = 'loading';
+  loading.innerText = 'Carregando...';
+  div.appendChild(loading);
+  const response = await fetch(`https://api.mercadolibre.com/items/${id}`);
+  const product = await response.json();
+  loading.remove();
+  return product;
+}
+
+async function getItemsIdsAndReturnArray() {
+  const getValuesLine = await localStorage.getItem('items')
+    ? localStorage.getItem('items').split(',')
+    : undefined;
+
+  if (getValuesLine) {
+    // NOTE Como a lista  de id é salva com virgulas, o ultimo retorna como undefined, então é necessário corta-lo
+    
+    // LINK Demonstrar debugger na pratica com erro, pois estava deixando somente essa validação e quando faltava so um item, ele o removia
+    // getValuesLine.splice(getValuesLine.length - 1);
+    return getValuesLine;
+  }
+  return undefined;
+}
+
 function createProductImageElement(imageSource) {
   const img = document.createElement('img');
   img.className = 'item__image';
@@ -25,37 +71,40 @@ async function createProductItemElement({
   section.appendChild(createCustomElement('span', 'item__sku', sku));
   section.appendChild(createCustomElement('span', 'item__title', name));
   section.appendChild(createProductImageElement(image));
-  section.appendChild(createCustomElement('span', 'item__price', `$ ${salePrice}`));
+  section.appendChild(
+    createCustomElement('span', 'item__price', `$ ${salePrice}`),
+  );
   section.appendChild(
     createCustomElement('button', 'item__add', 'Adicionar ao carrinho'),
   );
   return section;
 }
 
-function changePrice(price, operation) {
-  const getValuesLine = localStorage.getItem('items') ? localStorage.getItem('items').split(',') : '';
-  
-  if (getValuesLine) {
-    let values = getValuesLine.map((value) => value.split('|')[1]);
-    values = values.filter((value) => value !== undefined);
-    let total = values.reduce((acc, curr) => {
-      acc += curr; 
-      return acc;
-    });
-
-    if (operation === 'plus') total += price;
-    if (operation === 'minus') total -= price;
-    localStorage.setItem('value', total);
-    document.querySelector('.total-price').innerHTML = total;
+async function changePriceAfterUpdateLocalStorage() {
+  const productsIds = await getItemsIdsAndReturnArray();
+  let result = 0;
+  if (productsIds) {
+    result += await productsIds.reduce(async (total, id) => {
+      const product = await makeRequestProductById(id);
+      const count = await total + product.price;
+      return count;
+    }, 0);
   }
+  return result;
 }
 
-async function cartItemClickListener(event, price) {
+async function cartItemClickListener(event, id) {
   event.preventDefault();
   event.currentTarget.remove();
-  changePrice(price, 'minus');
+  let productsId = await getItemsIdsAndReturnArray();
 
-  localStorage.setItem('itemsHTML', cart.innerHTML);
+  // NOTE Realizando o padrão pois no final esta salvando uma string no final com ,
+  productsId = productsId.filter((pid) => pid !== id).join(',');
+  // NOTE Removendo em caso de não haver mais ids disponiveis e não ficar somente uma virgula no final, o que estava causando um bug.
+  if (productsId.length === 1) localStorage.removeItem('items');
+  localStorage.setItem('items', productsId);
+  const price = await changePriceAfterUpdateLocalStorage();
+  priceCard.innerHTML = price;
 }
 
 async function createCartItemElement({
@@ -65,80 +114,67 @@ async function createCartItemElement({
 }) {
   const li = document.createElement('li');
   li.className = 'cart__item';
-  li.innerHTML = `<span class="cart__id">SKU: ${sku}</span><span class="cart__name"> | NAME: ${name}</span><span class="cart__price"> | PRICE: $${salePrice}</span>`;
-  li.addEventListener('click', (e) => cartItemClickListener(e, salePrice));
-  changePrice(salePrice, 'plus');
+  li.innerHTML = `<span class="cart__id">SKU: ${sku}</span>`;
+  li.innerHTML += `<span class="cart__name"> | NAME: ${name}</span>`;
+  li.innerHTML += `<span class="cart__price"> | PRICE: $${salePrice}</span>`;
+  li.addEventListener('click', (e) => cartItemClickListener(e, sku));
   return li;
 }
 
-const makeRequestAllProducts = async (query = 'computador') => {
-  const loading = document.createElement('section');
-  const div = document.querySelector('.container');
-  loading.className = 'loading';
-  div.appendChild(loading);
-  return fetch(`https://api.mercadolibre.com/sites/MLB/search?q=${query}`)
-    .then((response) => response.json())
-    .then((json) => {
-      loading.remove();
-      return json.results;
-    });
-};
+async function addProductToCart(id) {
+  const product = await makeRequestProductById(id);
+  const productItem = await createCartItemElement(product);
 
-const makeRequestProductById = async (id) => {
-  const loading = document.createElement('section');
-  const div = document.querySelector('.container');
-  loading.className = 'loading';
-  div.appendChild(loading);
-  await fetch(`https://api.mercadolibre.com/items/${id}`)
-    .then((response) => response.json())
-    .then(async (product) => {
-      loading.remove();
-      const productItem = await createCartItemElement(product);
-      await changePrice(product.price, 'plus');
-      cart.appendChild(productItem);
-      let itens = localStorage.getItem('items') ? localStorage.getItem('items') : '';
-      itens += `${product.id}|${product.price},`;
-      localStorage.setItem('items', itens);
-      localStorage.setItem('itemsHTML', cart.innerHTML);
-    });
-};
+  cart.appendChild(productItem);
+  let itens = localStorage.getItem('items')
+    ? localStorage.getItem('items')
+    : '';
+  itens += `${product.id},`;
+  localStorage.setItem('items', itens);
+  const price = await changePriceAfterUpdateLocalStorage();
+  priceCard.innerHTML = price;
+}
 
-const activeGetProductsToCart = () => {
+function activeGetProductsToCart() {
   const btns = document.querySelectorAll('.item__add');
   btns.forEach((btn) => {
     const id = btn.parentElement.getAttribute('data-id');
-    btn.addEventListener('click', () => makeRequestProductById(id));
+    btn.addEventListener('click', () => addProductToCart(id));
   });
-};
+}
 
-const makeRequestAndGetProducts = async () => {
+async function makeRequestAndGetProducts() {
   const div = document.querySelector('.items');
-  const result = await makeRequestAllProducts();
+  const products = await makeRequestAllProducts();
 
-  result.forEach(async (product) => {
+  products.forEach(async (product) => {
     const section = await createProductItemElement(product);
+    // NOTE Ao inves de armazernar uma id dentro, utilize o conceito de 'key' do React
     section.setAttribute('data-id', product.id);
-    section.setAttribute('data-price', product.price);
     await div.appendChild(section);
   });
-};
+  const price = await changePriceAfterUpdateLocalStorage();
+  priceCard.innerHTML = price;
+}
 
-const getValueAndGoToTotal = async (div) => {
-  const getValuesLine = localStorage.getItem('items').split(',');
-  let values = getValuesLine.map((value) => value.split('|')[1]);
-  values = values.filter((value) => value !== undefined);
-  if (getValuesLine) {
-    await values.map((value) => changePrice(value, 'plus'));
+const generateListProducts = async () => {
+  const productsIds = await getItemsIdsAndReturnArray();
+  if (productsIds) {
+    await productsIds.forEach(async (id) => {
+      const product = await makeRequestProductById(id);
+      const section = await createCartItemElement(product);
+      cart.appendChild(section);
+    });
   }
+  return undefined;
 };
 
 const getItemsList = async () => {
-  const products = await localStorage.getItem('itemsHTML');
+  const products = await generateListProducts();
   if (products) {
     cart.innerHTML = products;
     const divs = await cart.children;
     Object.values(divs).forEach(async (div) => {
-      await getValueAndGoToTotal();
       div.addEventListener('click', cartItemClickListener);
     });
   }
@@ -148,9 +184,8 @@ const eraseCart = async () => {
   const btn = document.querySelector('.empty-cart');
   btn.addEventListener('click', () => {
     cart.innerHTML = '';
+    priceCard.innerHTML = 0;
     localStorage.removeItem('items');
-    localStorage.removeItem('itemsHTML');
-    localStorage.removeItem('value');
   });
 };
 
