@@ -31,18 +31,8 @@ async function makeRequestProductById(id) {
 }
 
 async function getItemsIdsAndReturnArray() {
-  const getValuesLine = (await localStorage.getItem('items'))
-    ? localStorage.getItem('items').split(',')
-    : undefined;
-
-  if (getValuesLine) {
-    // NOTE Como a lista  de id é salva com virgulas, o ultimo retorna como undefined, então é necessário corta-lo
-
-    // LINK Demonstrar debugger na pratica com erro, pois estava deixando somente essa validação e quando faltava so um item, ele o removia
-    getValuesLine.splice(getValuesLine.length - 1);
-    return getValuesLine;
-  }
-  return undefined;
+  const getValuesLine = (await JSON.parse(localStorage.getItem('items'))) || [];
+  return getValuesLine;
 }
 
 function createProductImageElement(imageSource) {
@@ -101,11 +91,9 @@ async function cartItemClickListener(event, id) {
   let productsId = await getItemsIdsAndReturnArray();
 
   // NOTE Realizando o padrão pois no final esta salvando uma string no final com ,
-  productsId = productsId.filter((pid) => pid !== id).join(',');
-  productsId += ',';
+  productsId = productsId.filter((pid) => pid !== id);
   // NOTE Removendo em caso de não haver mais ids disponiveis e não ficar somente uma virgula no final, o que estava causando um bug.
-  if (productsId.length === 1) localStorage.removeItem('items');
-  localStorage.setItem('items', productsId);
+  localStorage.setItem('items', JSON.stringify(productsId));
   const price = await changePriceAfterUpdateLocalStorage();
   priceCard.innerHTML = price;
 }
@@ -129,11 +117,9 @@ async function addProductToCart(id) {
   const productItem = await createCartItemElement(product);
 
   cart.appendChild(productItem);
-  let itens = localStorage.getItem('items')
-    ? localStorage.getItem('items')
-    : '';
-  itens += `${product.id},`;
-  localStorage.setItem('items', itens);
+  const itens = JSON.parse(localStorage.getItem('items')) || [];
+  itens.push(product.id);
+  localStorage.setItem('items', JSON.stringify(itens));
   const price = await changePriceAfterUpdateLocalStorage();
   priceCard.innerHTML = price;
 }
@@ -188,18 +174,11 @@ const eraseCart = async () => {
   btn.addEventListener('click', () => {
     cart.innerHTML = '';
     priceCard.innerHTML = 0;
-    localStorage.removeItem('items');
+    localStorage.setItem('items', JSON.stringify([]));
   });
 };
 
-async function verifyToClearLocalStorage() {
-  const value = localStorage.getItem('items');
-  if (!value) return;
-  if (value.length === 1) localStorage.clear();
-}
-
 window.onload = async () => {
-  await verifyToClearLocalStorage();
   await getItemsList();
   await eraseCart();
   await makeRequestAndGetProducts();
