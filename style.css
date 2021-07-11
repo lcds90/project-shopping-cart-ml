@@ -42,6 +42,7 @@ body {
   align-items: center;
   width: 100%;
   padding: 10px;
+  position: relative;
 }
 
 .item {
@@ -51,7 +52,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 75px 1fr 50px;
-  height: auto;
+  height: 300px;
   width: 100%;
   background-color: var(--primary-color);
   animation: zoomIn ease-in-out 1.5s;
@@ -82,6 +83,7 @@ body {
   background-color: var(--grey-color);
   box-shadow: 0 2px 5px var(--box-shadow-color);
   grid-column: span 2;
+  z-index: 20;
 }
 
 .item .item__image {
@@ -90,6 +92,7 @@ body {
   border-radius: 100%;
   box-shadow: 0 5px 5px var(--box-shadow-color);
   grid-column: span 2;
+  align-self: center;
 }
 
 .item .item__price {
@@ -131,6 +134,7 @@ body {
   grid-template-rows: 60% 1fr;
   box-shadow: 5px 5px 5px var(--box-shadow-color);
   background-color: rgb(180, 190, 204);
+  position: relative;
 }
 
 .cart #search {
@@ -151,6 +155,7 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .cart article:nth-of-type(2) {
@@ -179,6 +184,7 @@ body {
   height: 150px;
   margin: 5px;
   position: relative;
+  line-height: 0.9rem;
 }
 
 .cart .cart__title div {
@@ -228,6 +234,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 }
 
 .cart .cart__items .cart__item {
@@ -238,13 +245,13 @@ body {
   font-family: 'Source Sans Pro', sans-serif;
   grid: 50px 1fr / 1fr;
   place-items: center;
-  background-color: var(--grey-color);
   border-radius: 25px;
   margin-block: 10px;
   outline: #15173b 4px double;
   outline-offset: 2px;
   animation: fadeInLeft; /* referring directly to the animation's @keyframe declaration */
   animation-duration: 5s;
+  position: relative;
 }
 
 .cart .cart__items .cart__item .cart__id {
@@ -276,6 +283,19 @@ body {
   color: black;
   font-style: italic;
   font-weight: 600;
+}
+.cart .cart__items .cart__item .cart__image {
+  width: 60px;
+  height: 60px;
+  border-radius: 100px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  position: absolute;
+  top: -10px;
+    right: -25px;
+  border: 5px solid var(--secondary-color);
+  box-shadow: 0 3px 2px var(--box-shadow-color);
 }
 
 .cart .price {
@@ -327,7 +347,13 @@ ul {
   width: 100%;
   height: 100%;
   position: absolute;
-  background: black;
+  background: url('http://portal.ufvjm.edu.br/a-universidade/cursos/grade_curricular_ckan/loading.gif');
+  /* background: black; */
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  background-color: #15173b8f;
+  
   z-index: 25;
   color: white;
   vertical-align: middle;
@@ -336,12 +362,31 @@ ul {
   align-items: center;
   inset: 0;
   font-size: 2rem;
-  animation: fadeOut 1s ease;
+  animation: fadeIn 1s ease;
   margin: auto;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
+}
+
+.no-results {
+  width: 100%;
+  height: 20%;
+  color: red;
+  background-color: rgb(36, 0, 0);
+  font-style: italic;
+  font-weight: 200;
+  grid-column: span 4;
+  grid-row: span 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  text-align: center;
+  word-wrap: break-word;
+  border-radius: 5px;
+  animation: fadeIn 0.5s ease;
 }
 
 @media screen and (min-width: 768px) {
@@ -361,25 +406,14 @@ ul {
   .items {
     grid-template-columns: repeat(4, 1fr);
     grid-auto-rows: 1fr;
-    gap: 0 2px;
+    gap: 20px 2px;
     place-items: unset;
     align-items: flex-start;
   }
 
   .item {
-    border-radius: 10px;
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
-    display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 75px 1fr 50px;
-    height: auto;
-    background-color: var(--primary-color);
-    animation: zoomIn ease-in-out 1.5s;
-    z-index: 25;
-    margin-top: 50px;
-    position: relative;
-    border-inline: 2px solid var(--grey-color);
+    grid-template-rows: 20% 60% 20%;
   }
 
   .cart article {
@@ -389,6 +423,11 @@ ul {
 
   .cart .cart__items .cart__item {
     grid: 1fr / 1fr 1fr;
+  }
+
+  .no-results {
+  height: 50%;
+  margin-top: 25vh;
   }
 
   .cart__title,

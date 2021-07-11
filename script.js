@@ -4,7 +4,7 @@ const searchInput = document.querySelector('#search');
 // SECTION Requisito 1
 async function makeRequestAllProducts(query) {
   const loading = document.createElement('section');
-  const div = document.querySelector('.container');
+  const div = document.querySelector('.items');
   // NOTE Requisito 7
   loading.className = 'loading';
   loading.innerText = 'Carregando...';
@@ -20,7 +20,7 @@ async function makeRequestAllProducts(query) {
 
 async function makeRequestProductById(id) {
   const loading = document.createElement('section');
-  const div = document.querySelector('.container');
+  const div = document.querySelector('.cart');
   loading.className = 'loading';
   loading.innerText = 'Carregando...';
   div.appendChild(loading);
@@ -104,13 +104,18 @@ async function createCartItemElement({
   id: sku,
   title: name,
   price: salePrice,
+  thumbnail: image,
 }) {
   const li = document.createElement('li');
+  const span = document.createElement('span');
   li.className = 'cart__item';
   li.innerHTML = `<span class="cart__id">SKU: ${sku}</span>`;
   li.innerHTML += `<span class="cart__name"> | NAME: ${name}</span>`;
   li.innerHTML += `<span class="cart__price"> | PRICE: $${salePrice}</span>`;
+  span.style.backgroundImage = `url('${image}')`;
+  span.className = 'cart__image';
   li.addEventListener('click', (e) => cartItemClickListener(e, sku));
+  li.appendChild(span);
   return li;
 }
 
@@ -176,6 +181,7 @@ function eraseCart() {
   btn.addEventListener('click', () => {
     cart.innerHTML = '';
     priceCard.innerHTML = 0;
+    document.querySelector('.total-qtd').innerHTML = 0;
     localStorage.setItem('items', JSON.stringify([]));
   });
 }
@@ -187,9 +193,13 @@ window.onload = async () => {
   await activeGetProductsToCart();
   await searchInput.addEventListener('keypress', async (e) => {
     if (e.key === 'Enter') {
-      document.querySelector('.items').innerHTML = '';
+      const items = document.querySelector('.items');
+      items.innerHTML = '';
       await makeRequestAndGetProducts(searchInput.value);
       await activeGetProductsToCart();
+      if (items.children.length === 0) {
+        items.innerHTML = '<div class="no-results">Sem resultados para exibir</div>';
+      }
     }
   });
 };
