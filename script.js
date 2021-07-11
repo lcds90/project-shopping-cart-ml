@@ -31,15 +31,15 @@ async function makeRequestProductById(id) {
 }
 
 async function getItemsIdsAndReturnArray() {
-  const getValuesLine = await localStorage.getItem('items')
+  const getValuesLine = (await localStorage.getItem('items'))
     ? localStorage.getItem('items').split(',')
     : undefined;
 
   if (getValuesLine) {
     // NOTE Como a lista  de id é salva com virgulas, o ultimo retorna como undefined, então é necessário corta-lo
-    
+
     // LINK Demonstrar debugger na pratica com erro, pois estava deixando somente essa validação e quando faltava so um item, ele o removia
-    // getValuesLine.splice(getValuesLine.length - 1);
+    getValuesLine.splice(getValuesLine.length - 1);
     return getValuesLine;
   }
   return undefined;
@@ -86,10 +86,12 @@ async function changePriceAfterUpdateLocalStorage() {
   if (productsIds) {
     result += await productsIds.reduce(async (total, id) => {
       const product = await makeRequestProductById(id);
-      const count = await total + product.price;
+      const count = (await total) + product.price;
       return count;
     }, 0);
   }
+
+  if (Number.isNaN(result)) result = 0;
   return result;
 }
 
@@ -100,6 +102,7 @@ async function cartItemClickListener(event, id) {
 
   // NOTE Realizando o padrão pois no final esta salvando uma string no final com ,
   productsId = productsId.filter((pid) => pid !== id).join(',');
+  productsId += ',';
   // NOTE Removendo em caso de não haver mais ids disponiveis e não ficar somente uma virgula no final, o que estava causando um bug.
   if (productsId.length === 1) localStorage.removeItem('items');
   localStorage.setItem('items', productsId);
@@ -189,7 +192,14 @@ const eraseCart = async () => {
   });
 };
 
+async function verifyToClearLocalStorage() {
+  const value = localStorage.getItem('items');
+  if (!value) return;
+  if (value.length === 1) localStorage.clear();
+}
+
 window.onload = async () => {
+  await verifyToClearLocalStorage();
   await getItemsList();
   await eraseCart();
   await makeRequestAndGetProducts();
