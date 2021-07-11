@@ -59,7 +59,6 @@ body {
   position: relative;
   border-inline: 2px solid var(--grey-color);
   padding: 5px;
-
 }
 
 .item > * {
@@ -164,26 +163,44 @@ body {
 }
 
 .cart .cart__title {
-  font-size: 1.5rem;
   text-align: center;
   font-family: 'Crimson Text', serif;
   font-weight: bold;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: flex-end;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  box-shadow: 0 5px 5px var(--box-shadow-color);
+  color: rgb(238, 238, 238);
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 150px;
+  margin: 5px;
+  position: relative;
+}
+
+.cart .cart__title div {
   background: url('https://media4.giphy.com/media/33JLEyQSCHyJrMxiA6/giphy.gif?cid=6c09b9527cttp6yl5m3yco7ph1ylz00rf209975xqskl69tq&rid=giphy.gif&ct=s');
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;
-  background-color: var(--primary-color);
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-  box-shadow: 0 5px 5px var(--box-shadow-color);
-  color: rgb(255, 255, 255);
-  text-shadow: 0 2px 2px black;
+  background-color: var(--secondary-color);
   width: 100%;
-  height: 100px;
-  margin: 25px;
+  height: 100%;
+}
+
+.cart .cart__title i {
+  font-size: 2rem;
+  font-style: italic;
+  font-weight: 200;
+  background-color: var(--secondary-color);
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .cart button {
@@ -331,6 +348,14 @@ ul {
   .container {
     grid-template-columns: 30vw 1fr;
     grid-template-rows: 1fr;
+  }
+
+  .cart .cart__title {
+    flex-direction: row;
+  }
+
+  .cart .cart__title div {
+    width: 50%;
   }
 
   .items {

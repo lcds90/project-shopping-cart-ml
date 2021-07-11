@@ -97,7 +97,7 @@ async function cartItemClickListener(event, id) {
   // NOTE Removendo em caso de não haver mais ids disponiveis e não ficar somente uma virgula no final, o que estava causando um bug.
   localStorage.setItem('items', JSON.stringify(productsId));
   const price = await changePriceAfterUpdateLocalStorage();
-  priceCard.innerHTML = `$ ${price}`;
+  priceCard.innerHTML = price;
 }
 
 async function createCartItemElement({
@@ -123,7 +123,7 @@ async function addProductToCart(id) {
   itens.push(product.id);
   localStorage.setItem('items', JSON.stringify(itens));
   const price = await changePriceAfterUpdateLocalStorage();
-  priceCard.innerHTML = `$ ${price}`;
+  priceCard.innerHTML = price;
 }
 
 function activeGetProductsToCart() {
@@ -145,7 +145,7 @@ async function makeRequestAndGetProducts(query = 'computador') {
     await div.appendChild(section);
   });
   const price = await changePriceAfterUpdateLocalStorage();
-  priceCard.innerHTML = `$ ${price}`;
+  priceCard.innerHTML = price;
 }
 
 async function generateListProducts() {
@@ -175,7 +175,7 @@ function eraseCart() {
   const btn = document.querySelector('.empty-cart');
   btn.addEventListener('click', () => {
     cart.innerHTML = '';
-    priceCard.innerHTML = '$ 0';
+    priceCard.innerHTML = 0;
     localStorage.setItem('items', JSON.stringify([]));
   });
 }
