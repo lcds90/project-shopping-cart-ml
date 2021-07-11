@@ -142,12 +142,16 @@ function activeGetProductsToCart() {
 async function makeRequestAndGetProducts(query = 'computador') {
   const div = document.querySelector('.items');
   const products = await makeRequestAllProducts(query);
-
+  let index = 0;
   products.forEach(async (product) => {
     const section = await createProductItemElement(product);
     // NOTE Ao inves de armazernar uma id dentro, utilize o conceito de 'key' do React
     section.setAttribute('data-id', product.id);
-    await div.appendChild(section);
+    section.style.animation = `flipInY 2.5s ease ${index * 0.075}s`;
+    setTimeout(() => { section.style.opacity = 1; }, (index * 0.175) + 1250);
+    index += 1;
+    console.log(index);
+  await div.appendChild(section);
   });
   const price = await changePriceAfterUpdateLocalStorage();
   priceCard.innerHTML = price;
@@ -178,11 +182,16 @@ async function getItemsList() {
 
 function eraseCart() {
   const btn = document.querySelector('.empty-cart');
-  btn.addEventListener('click', () => {
-    cart.innerHTML = '';
-    priceCard.innerHTML = 0;
-    document.querySelector('.total-qtd').innerHTML = 0;
-    localStorage.setItem('items', JSON.stringify([]));
+  btn.addEventListener('click', async () => {
+    await Object.values(cart.children).forEach(async (item) => {
+      item.classList.add('cart-fade');
+    });
+    setTimeout(() => {
+      cart.innerHTML = '';
+      priceCard.innerHTML = 0;
+      document.querySelector('.total-qtd').innerHTML = 0;
+      localStorage.setItem('items', JSON.stringify([]));
+    }, 2000);
   });
 }
 
