@@ -6,7 +6,7 @@
 
 :root {
   --primary-color: #aad5e6;
-  --secondary-color: #15173b;
+  --secondary-color: #36b36a;
   --light-color: #c4f7fb;
   --grey-color: #59717a;
   --box-shadow-color: rgba(65, 59, 122, 0.5);
@@ -27,15 +27,15 @@ body {
 
 .container {
   display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr 70vh;
+  grid-template-columns: 30vw 1fr;
+  grid-template-rows: 1fr;
   height: 100%;
   position: relative;
 }
 
 .items {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   grid-auto-rows: 200px;
   overflow-y: auto;
   gap: 50px 25px;
@@ -122,10 +122,23 @@ body {
   height: 100%;
   display: grid;
   place-items: center;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr;
+  grid-template-columns: 1fr;
+  grid-template-rows: 50% 1fr;
   box-shadow: 5px 5px 5px var(--box-shadow-color);
-  background-color: var(--grey-color);
+  background-color: rgb(180, 190, 204);
+}
+
+.cart #search {
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  height: 20px;
+  padding: 10px;
+  box-shadow: 2px 2px 5px var(--box-shadow-color);
+}
+
+.cart #search:placeholder-shown{
+  text-align: center;
 }
 
 .cart article {
@@ -133,6 +146,7 @@ body {
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
 }
 
@@ -146,24 +160,23 @@ body {
 }
 
 .cart .cart__title {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   text-align: center;
   font-family: 'Crimson Text', serif;
   font-weight: bold;
   display: flex;
   justify-content: center;
-  align-items: center;
-  -webkit-animation: change-color 40s ease 0s infinite normal,
-    fadeInUp 2s ease-in-out;
-  -moz-animation: change-color 40s ease 0s infinite normal,
-    fadeInUp 2s ease-in-out;
-  -ms-animation: change-color 40s ease 0s infinite normal,
-    fadeInUp 2s ease-in-out;
-  animation: change-color 40s ease 0s infinite normal, fadeInUp 2s ease-in-out;
+  align-items: flex-end;
+  background: url('https://media4.giphy.com/media/33JLEyQSCHyJrMxiA6/giphy.gif?cid=6c09b9527cttp6yl5m3yco7ph1ylz00rf209975xqskl69tq&rid=giphy.gif&ct=s');
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: var(--primary-color);
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
   box-shadow: 0 5px 5px var(--box-shadow-color);
   color: rgb(255, 255, 255);
+  text-shadow: 0 2px 2px black;
   width: 300px;
   height: 100px;
   margin: 25px;
@@ -207,7 +220,8 @@ body {
   background-color: var(--grey-color);
   border-radius: 25px;
   margin-block: 10px;
-  outline: #15173b 5px double;
+  outline: #15173b 4px double;
+  outline-offset: 2px;
   animation: fadeInLeft; /* referring directly to the animation's @keyframe declaration */
   animation-duration: 5s;
 }
@@ -222,26 +236,25 @@ body {
   border-bottom: 5px var(--grey-color) solid;
 }
 
-.cart .cart__items .cart__item .cart__name {
-  background-color: var(--secondary-color);
-  width: 100%;
-  text-align: center;
-  color: white;
-  font-weight: 600;
-  border-radius: 10px;
-}
-
 .cart .cart__items .cart__item .cart__price {
   background-color: var(--secondary-color);
   width: 100%;
-  height: 50%;
-  color: white;
-  font-style: italic;
-  font-weight: 600;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 0 10px rgba(8, 186, 218, 0.664);
+  text-align: center;
+  color: white;
+  font-weight: 600;
+}
+
+.cart .cart__items .cart__item .cart__name {
+  background-color: var(--secondary-color);
+  width: 100%;
+  height: 100%;
+  color: black;
+  font-style: italic;
+  font-weight: 600;
 }
 
 .cart .price {
@@ -249,8 +262,8 @@ body {
   justify-content: center;
   align-items: center;
   background-color: green;
-  padding: 25px;
-  width: 300px;
+  padding: 15px;
+  width: 350px;
   color: white;
   border-radius: 5px;
   border-bottom: 5px solid var(--secondary-color);
@@ -260,11 +273,17 @@ body {
   animation: flipInY 2.5s ease-in-out;
 }
 
-.cart .price > div {
+.cart .price .price-article {
   margin-inline: 10px;
   background-color: var(--box-shadow-color);
   padding: 10px 5px;
   font-weight: 200;
+  border-left: 0.5px solid black;
+}
+
+.cart .price span {
+  background: var(--secondary-color);
+  padding: 10px 5px;
 }
 
 .cart .price .total-price {

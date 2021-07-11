@@ -1,8 +1,8 @@
 const cart = document.querySelector('.cart__items');
 const priceCard = document.querySelector('.total-price');
-
+const searchInput = document.querySelector('#search');
 // SECTION Requisito 1
-async function makeRequestAllProducts(query = 'computador') {
+async function makeRequestAllProducts(query) {
   const loading = document.createElement('section');
   const div = document.querySelector('.container');
   // NOTE Requisito 7
@@ -73,6 +73,7 @@ async function createProductItemElement({
 async function changePriceAfterUpdateLocalStorage() {
   const productsIds = await getItemsIdsAndReturnArray();
   let result = 0;
+  const qtd = productsIds.length;
   if (productsIds) {
     result += await productsIds.reduce(async (total, id) => {
       const product = await makeRequestProductById(id);
@@ -82,6 +83,7 @@ async function changePriceAfterUpdateLocalStorage() {
   }
 
   if (Number.isNaN(result)) result = 0;
+  document.querySelector('.total-qtd').innerHTML = qtd;
   return result;
 }
 
@@ -95,7 +97,7 @@ async function cartItemClickListener(event, id) {
   // NOTE Removendo em caso de não haver mais ids disponiveis e não ficar somente uma virgula no final, o que estava causando um bug.
   localStorage.setItem('items', JSON.stringify(productsId));
   const price = await changePriceAfterUpdateLocalStorage();
-  priceCard.innerHTML = price;
+  priceCard.innerHTML = `$ ${price}`;
 }
 
 async function createCartItemElement({
@@ -121,7 +123,7 @@ async function addProductToCart(id) {
   itens.push(product.id);
   localStorage.setItem('items', JSON.stringify(itens));
   const price = await changePriceAfterUpdateLocalStorage();
-  priceCard.innerHTML = price;
+  priceCard.innerHTML = `$ ${price}`;
 }
 
 function activeGetProductsToCart() {
@@ -132,9 +134,9 @@ function activeGetProductsToCart() {
   });
 }
 
-async function makeRequestAndGetProducts() {
+async function makeRequestAndGetProducts(query = 'computador') {
   const div = document.querySelector('.items');
-  const products = await makeRequestAllProducts();
+  const products = await makeRequestAllProducts(query);
 
   products.forEach(async (product) => {
     const section = await createProductItemElement(product);
@@ -143,10 +145,10 @@ async function makeRequestAndGetProducts() {
     await div.appendChild(section);
   });
   const price = await changePriceAfterUpdateLocalStorage();
-  priceCard.innerHTML = price;
+  priceCard.innerHTML = `$ ${price}`;
 }
 
-const generateListProducts = async () => {
+async function generateListProducts() {
   const productsIds = await getItemsIdsAndReturnArray();
   if (productsIds) {
     await productsIds.forEach(async (id) => {
@@ -156,31 +158,38 @@ const generateListProducts = async () => {
     });
   }
   return undefined;
-};
+}
 
-const getItemsList = async () => {
+async function getItemsList() {
   const products = await generateListProducts();
   if (products) {
     cart.innerHTML = products;
     const divs = await cart.children;
     Object.values(divs).forEach(async (div) => {
-      div.addEventListener('click', cartItemClickListener);
+      await div.addEventListener('click', cartItemClickListener);
     });
   }
-};
+}
 
-const eraseCart = async () => {
+function eraseCart() {
   const btn = document.querySelector('.empty-cart');
   btn.addEventListener('click', () => {
     cart.innerHTML = '';
-    priceCard.innerHTML = 0;
+    priceCard.innerHTML = '$ 0';
     localStorage.setItem('items', JSON.stringify([]));
   });
-};
+}
 
 window.onload = async () => {
   await getItemsList();
   await eraseCart();
   await makeRequestAndGetProducts();
   await activeGetProductsToCart();
+  await searchInput.addEventListener('keypress', async (e) => {
+    if (e.key === 'Enter') {
+      document.querySelector('.items').innerHTML = '';
+      await makeRequestAndGetProducts(searchInput.value);
+      await activeGetProductsToCart();
+    }
+  });
 };
