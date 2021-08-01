@@ -91,10 +91,7 @@ async function cartItemClickListener(event, id) {
   event.preventDefault();
   event.currentTarget.remove();
   let productsId = await getItemsIdsAndReturnArray();
-
-  // NOTE Realizando o padrão pois no final esta salvando uma string no final com ,
-  productsId = productsId.filter((pid) => pid !== id);
-  // NOTE Removendo em caso de não haver mais ids disponiveis e não ficar somente uma virgula no final, o que estava causando um bug.
+  productsId = productsId.filter((pid) => pid !== id); // NOTE Excluindo item.
   localStorage.setItem('items', JSON.stringify(productsId));
   const price = await changePriceAfterUpdateLocalStorage();
   priceCard.innerHTML = price;
@@ -150,7 +147,6 @@ async function makeRequestAndGetProducts(query = 'computador') {
     section.style.animation = `flipInY 2.5s ease ${index * 0.075}s`;
     setTimeout(() => { section.style.opacity = 1; }, (index * 0.175) + 1250);
     index += 1;
-    console.log(index);
   await div.appendChild(section);
   });
   const price = await changePriceAfterUpdateLocalStorage();
@@ -183,6 +179,7 @@ async function getItemsList() {
 function eraseCart() {
   const btn = document.querySelector('.empty-cart');
   btn.addEventListener('click', async () => {
+    // NOTE Animação
     await Object.values(cart.children).forEach(async (item) => {
       item.classList.add('cart-fade');
     });
